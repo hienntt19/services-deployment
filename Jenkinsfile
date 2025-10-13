@@ -23,10 +23,23 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo "Install requirements.txt..."
-                sh 'python -m pip install -r requirements.txt'
-                echo "Running unit tests from ${env.TEST_DIRECTORY}..."
-                sh 'pytest ${env.TEST_DIRECTORY}/'
+                echo "Installing Python3, Pip, and Venv..."
+                sh 'apt-get update && apt-get install -y python3 python3-pip python3-venv'
+
+                echo "Creating and activating virtual environment..."
+                sh 'python3 -m venv .venv' 
+
+                echo "Installing dependencies into virtual environment..."
+                sh '''
+                    . .venv/bin/activate
+                    pip install -r requirements.txt
+                '''
+
+                echo "Running unit tests using virtual environment..."
+                sh '''
+                    . .venv/bin/activate
+                    pytest tests/
+                '''
             }
         }
 
